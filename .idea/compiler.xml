@@ -6,9 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="cloud_common" />
+        <module name="common" />
         <module name="cloud_client" />
         <module name="cloud_server" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cloud_common" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
