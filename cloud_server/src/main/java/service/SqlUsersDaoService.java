@@ -15,7 +15,7 @@ public class SqlUsersDaoService implements AuthenticationService {
 	public SqlUsersDaoService() {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/cloudstorage_users", "root", "Chloeval//3009195200//");
+			this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/cloudstorage_users", "root", "**********");
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
