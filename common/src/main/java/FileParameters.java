@@ -1,7 +1,4 @@
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,20 +13,27 @@ import java.nio.file.attribute.BasicFileAttributes;
  * 2. Размер файла
  * 3. Дата последней модификации файла
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class FileParameters implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String name;
 	private Long size;
 	private String date;
-	
-	
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
 //	public FileParameters(String fileName, String fileStoragePath) {
 //		Path path = Paths.get(name + fileStoragePath);
 //		this.name = fileName;
@@ -41,7 +45,7 @@ public class FileParameters implements Serializable {
 //			e.printStackTrace();
 //		}
 //	}
-	
+
 	public FileParameters(Path path) {
 		this.name = path.toFile().getName();
 		try {
@@ -51,30 +55,5 @@ public class FileParameters implements Serializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Long getSize() {
-		return size;
-	}
-
-	public void setSize(Long size) {
-		this.size = size;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
 	}
 }

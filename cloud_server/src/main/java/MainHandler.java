@@ -1,10 +1,6 @@
-import chanofauthenrification.CheckPassMiddle;
-import chanofauthenrification.LoginExistCheckMiddle;
-import chanofauthenrification.MiddleWare;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import service.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Comparator;
+
 
 /**
  * Класс-обработчик всех входящих десериализованных классов-сообщений от клиента
@@ -20,11 +16,10 @@ import java.util.Comparator;
 public class MainHandler extends ChannelInboundHandlerAdapter {
 
 	private String userCloudStorage;
+	private DBHandler dbHandler;
 
-	private AuthenticationService sqlUsersDaoService;
-
-	public MainHandler() {
-		sqlUsersDaoService = AuthenticationFactory.createAuthenticationService();
+	public MainHandler(DBHandler dbHandler) {
+		this.dbHandler = dbHandler;
 	}
 
 	@Override
@@ -34,14 +29,13 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 				return;
 			}
 			if (msg instanceof AuthenticationMessage) {
-				authMessageHandler(ctx, msg);
+				AuthMsg(ctx, msg);
 			}
 			if (msg instanceof FileOperationsMessage) {
-				fileOperationMessageHandler(ctx, msg);
+				CommandMsg(ctx, msg);
 			}
-
 			if (msg instanceof FileParametersListMessage) {
-				sendListOfFileParameters(ctx);
+				FileParametersMsg(ctx);
 			}
 			if (msg instanceof FileMessage) {
 				FileMessage fileMessage = (FileMessage) msg;
@@ -53,7 +47,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	private void fileOperationMessageHandler(ChannelHandlerContext ctx, Object msg) throws IOException {
+	private void CommandMsg(ChannelHandlerContext ctx, Object msg) throws IOException {
 		FileOperationsMessage fileOperationsMessage = (FileOperationsMessage) msg;
 		switch (fileOperationsMessage.getFileOperation()) {
 		case COPY:
@@ -71,23 +65,20 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	private void authMessageHandler(ChannelHandlerContext ctx, Object msg) {
+	private void AuthMsg(ChannelHandlerContext ctx, Object msg) {
 		AuthenticationMessage authMessage = (AuthenticationMessage) msg;
 		switch (authMessage.getAuthCommandType()) {
 		case AUTHORIZATION:
-			MiddleWare authMiddle = new LoginExistCheckMiddle(sqlUsersDaoService);
-			authMiddle.linkWith(new CheckPassMiddle(sqlUsersDaoService));
-
-			if (authMiddle.check(authMessage.getLogin(), authMessage.getPassword())) {
+			if (dbHandler.authentication (authMessage.getLogin(), authMessage.getPassword())) {
 				authMessage.setStatus(true);
-				userCloudStorage = authMessage.getLogin() + "Storage/";
+				userCloudStorage = "D:\\" + authMessage.getLogin();
 				ctx.writeAndFlush(authMessage);
 			} else {
 				ctx.writeAndFlush(authMessage);
 			}
 			break;
 		case CHANGE_PASS:
-			if (sqlUsersDaoService.changePass(authMessage.getLogin(), authMessage.getPassword(),
+			if (dbHandler.changePass(authMessage.getLogin(), authMessage.getPassword(),
 					authMessage.getNewPassword())) {
 				authMessage.setStatus(true);
 				ctx.writeAndFlush(authMessage);
@@ -95,21 +86,10 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 				ctx.writeAndFlush(authMessage);
 			}
 			break;
-		case DELETE_USER:
-			if (sqlUsersDaoService.authentication(authMessage.getLogin(), authMessage.getPassword())) {
-				authMessage.setStatus(true);
-				sqlUsersDaoService.deleteUserByName(authMessage.getLogin());
-				userCloudStorage = authMessage.getLogin() + "Storage/";
-				deleteUsersCloudStorage(userCloudStorage);
-				ctx.writeAndFlush(authMessage);
-			} else {
-				ctx.writeAndFlush(authMessage);
-			}
-			break;
 		case REGISTRATION:
-			if (sqlUsersDaoService.selectUserByName(authMessage.getLogin()) == null) {
+			if (dbHandler.selectUserByName(authMessage.getLogin()) == null) {
 				authMessage.setStatus(true);
-				sqlUsersDaoService.insertUser(authMessage.getLogin(), authMessage.getPassword());
+				dbHandler.insertUser(authMessage.getLogin(), authMessage.getPassword());
 				ctx.writeAndFlush(authMessage);
 			} else {
 				ctx.writeAndFlush(authMessage);
@@ -120,24 +100,17 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	private void deleteUsersCloudStorage(String userCloudStorage) {
-		Path userStoragePath = Paths.get(userCloudStorage);
-		try {
-			Files.walk(userStoragePath).sorted(Comparator.reverseOrder()).peek(System.out::println).map(Path::toFile)
-					.forEach(File::delete);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	private void deleteUsersCloudStorage(String userCloudStorage) {
+//		Path userStoragePath = Paths.get(userCloudStorage);
+//		try {
+//			Files.walk(userStoragePath).sorted(Comparator.reverseOrder()).peek(System.out::println).map(Path::toFile)
+//					.forEach(File::delete);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
-	private void deleteFileFromCloudStorage(ChannelHandlerContext ctx, FileOperationsMessage fileOperationsMessage)
-			throws IOException {
-		Path path = Paths.get(userCloudStorage + fileOperationsMessage.getFileName());
-		Files.delete(path);
-		sendListOfFileParameters(ctx);
-	}
-
-	private void sendListOfFileParameters(ChannelHandlerContext ctx) {
+	private void FileParametersMsg(ChannelHandlerContext ctx) {
 		File directory = new File(userCloudStorage);
 
 		if (!directory.exists()) {
@@ -145,6 +118,13 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 		}
 		FileParametersListMessage fileParametersList = new FileParametersListMessage(userCloudStorage);
 		ctx.writeAndFlush(fileParametersList);
+	}
+
+	private void deleteFileFromCloudStorage(ChannelHandlerContext ctx, FileOperationsMessage fileOperationsMessage)
+			throws IOException {
+		Path path = Paths.get(userCloudStorage + fileOperationsMessage.getFileName());
+		Files.delete(path);
+		FileParametersMsg(ctx);
 	}
 
 	private void copyToClientStorage(ChannelHandlerContext ctx, FileOperationsMessage fileOperationsMessage)

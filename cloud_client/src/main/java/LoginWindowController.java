@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SignInFxController implements Initializable {
+public class LoginWindowController implements Initializable {
 
 	@FXML
 	private VBox rootPane;
@@ -34,11 +34,15 @@ public class SignInFxController implements Initializable {
 
 	@FXML
 	private void submit() {
-		String login = loginTextField.getText();
-		String password = passwordField.getText();
-		AuthenticationMessage authMessage = new AuthenticationMessage(login, password,
-				AuthenticationMessage.AuthCommandType.AUTHORIZATION);
-		Network.sendMsg(authMessage);
+		if (!loginTextField.getText().isEmpty() && !passwordField.getText().isEmpty()) {
+			String login = loginTextField.getText();
+			String password = passwordField.getText();
+			AuthenticationMessage authMessage = new AuthenticationMessage(login, password,
+					AuthenticationMessage.AuthCommandType.AUTHORIZATION);
+			Network.sendMsg(authMessage);
+		} else {
+			return;
+		}
 	}
 
 	@FXML
@@ -50,7 +54,7 @@ public class SignInFxController implements Initializable {
 		final Stage dialog = new Stage();
 		dialog.initModality(Modality.APPLICATION_MODAL);
 		dialog.initOwner(rootPane.getScene().getWindow());
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/User.fxml"));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("User.fxml"));
 		VBox vRootBox;
 		try {
 			vRootBox = fxmlLoader.load();
@@ -68,16 +72,11 @@ public class SignInFxController implements Initializable {
 	private void changePassword() {
 		openUserWindow("Change Password");
 	}
-	
-	@FXML
-	private void deleteUser() {
-		openUserWindow("Delete User");
-	}
 
 	private void enterStorage() {
 		VBox vBox;
 		try {
-			vBox = FXMLLoader.load(getClass().getResource("/StoragePanel.fxml"));
+			vBox = FXMLLoader.load(getClass().getClassLoader().getResource("StoragePanel.fxml"));
 			rootPane.getChildren().setAll(vBox);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -87,7 +86,7 @@ public class SignInFxController implements Initializable {
 
 	/**
 	 * Метод создает поток, который обменивается и обрабатывает сообщения типа
-	 * {@link AuthenticationMessage} из {@link MessageReceiver}
+	 * {@link AuthenticationMessage}
 	 */
 	private void createReceiveMessageThread() {
 		Thread t = new Thread(() -> {
@@ -109,15 +108,6 @@ public class SignInFxController implements Initializable {
 						Util.fxThreadProcess(() -> {
 							if(authenticationMessage.isStatus()) {
 								sqlOutputLabel.setText("user password with login '"  + authenticationMessage.getLogin() + "' successfully changed");
-							} else {
-								sqlOutputLabel.setText("no user with login '" + authenticationMessage.getLogin() + "' or password incorrect");
-							}
-						});
-						break;
-					case DELETE_USER:
-						Util.fxThreadProcess(() -> {
-							if(authenticationMessage.isStatus()) {
-								sqlOutputLabel.setText("user with login '"  + authenticationMessage.getLogin() + "' and his storage successfully deleted");
 							} else {
 								sqlOutputLabel.setText("no user with login '" + authenticationMessage.getLogin() + "' or password incorrect");
 							}

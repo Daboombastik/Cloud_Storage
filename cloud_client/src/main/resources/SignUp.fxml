@@ -13,7 +13,7 @@
 <VBox fx:id="rootPane" alignment="TOP_CENTER" minHeight="60.0" prefHeight="768.0" prefWidth="1024.0"
       xmlns="http://javafx.com/javafx/10.0.2-internal"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="SignInFxController">
+      fx:controller="LoginWindowController">
    <children>
       <HBox alignment="CENTER" prefHeight="250.0" prefWidth="1024.0" style="-fx-background-color: #2e3747;">
          <children>
@@ -69,14 +69,14 @@
                   <Insets left="10.0" />
                </HBox.margin>
             </Hyperlink>
-            <Hyperlink onAction="#deleteUser" text="Delete user storege">
-               <font>
-                  <Font size="20.0" />
-               </font>
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin>
-            </Hyperlink>
+<!--            <Hyperlink onAction="#deleteUser" text="Delete user storage">-->
+<!--               <font>-->
+<!--                  <Font size="20.0" />-->
+<!--               </font>-->
+<!--               <HBox.margin>-->
+<!--                  <Insets left="10.0" />-->
+<!--               </HBox.margin>-->
+<!--            </Hyperlink>-->
          </children></HBox>
       <Label fx:id="sqlOutputLabel" alignment="CENTER" contentDisplay="TOP" prefHeight="104.0" prefWidth="654.0" text="" textAlignment="CENTER" textFill="RED" wrapText="true">
          <VBox.margin>

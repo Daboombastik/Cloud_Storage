@@ -14,7 +14,7 @@
 <VBox prefHeight="768.0" prefWidth="1024.0"
 	  xmlns="http://javafx.com/javafx/10.0.2-internal"
 	  xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane"
-	fx:controller="StoragePanelFxController">
+	fx:controller="FilemanagerWindowController">
 	<children>
 		<MenuBar>
 			<menus>

@@ -11,10 +11,13 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
 
-public class ServerMainClass {
+public class Server {
     private static final int MAX_OBJ_SIZE = 100 * 1024 * 1024;
 
     public void run() throws Exception {
+        //запускаем базу данных и передаем ее в MainHandler
+        DBHandler dataBaseHandler = new DBHandler();
+        //запускаем сервер
         EventLoopGroup mainGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -23,11 +26,11 @@ public class ServerMainClass {
             b.group(mainGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline().addLast(
                                     new ObjectDecoder(MAX_OBJ_SIZE, ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
-                                    new MainHandler()
+                                    new MainHandler(dataBaseHandler)
                             );
                         }
                     })
@@ -35,6 +38,7 @@ public class ServerMainClass {
 //                    .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture future = b.bind(8189).sync();
+            System.out.println("Server started");
             future.channel().closeFuture().sync();
         } finally {
             mainGroup.shutdownGracefully();
@@ -43,6 +47,6 @@ public class ServerMainClass {
     }
 
     public static void main(String[] args) throws Exception {
-        new ServerMainClass().run();
+        new Server().run();
     }
 }

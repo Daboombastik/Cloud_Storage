@@ -1,7 +1,4 @@
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,9 +11,7 @@ import java.util.stream.Collectors;
 /**
  *  Класс для передачи сообщения со  списком {@link FileParameters} между сервером и клиеном
  */
-@Getter
-@Setter
-@AllArgsConstructor
+
 public class FileParametersListMessage extends AbstractMessage{
 
 	private static final long serialVersionUID = 122661028145564867L;
@@ -34,15 +29,10 @@ public class FileParametersListMessage extends AbstractMessage{
 	}
 
 	public FileParametersListMessage() {
-
 	}
-
 
 	public List<FileParameters> getFileParameterList() {
 		return fileParameterList;
 	}
 
-	public void setFileParameterList(List<FileParameters> fileParameterList) {
-		this.fileParameterList = fileParameterList;
-	}
 }

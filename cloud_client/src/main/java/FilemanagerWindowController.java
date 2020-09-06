@@ -19,9 +19,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ResourceBundle;
 
-public class StoragePanelFxController implements Initializable {
+public class FilemanagerWindowController implements Initializable {
 	
-	private static final String  CLIENT_STORAGE = "client_storage/";	
+	private static final String  CLIENT_STORAGE = "D:\\client_storage";
 	
 	@FXML
 	private VBox rootPane;
@@ -74,7 +74,7 @@ public class StoragePanelFxController implements Initializable {
 
 	/**
 	 * Метод создает поток, который обменивается и обрабатывает сообщения
-	 *  типа {@link AbstractMessage} из {@link MessageReceiver}
+	 *  типа {@link AbstractMessage}
 	 */
 	private void createReceiveMessageThread() {
 		Thread t = new Thread(() -> {
@@ -91,12 +91,8 @@ public class StoragePanelFxController implements Initializable {
 						refreshLocalFileTable();												
 					}
 				}
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} finally {
-				Network.stop();
 			}
 		}, "StorageMsgReceiver");
 		t.setDaemon(true);
@@ -207,7 +203,6 @@ public class StoragePanelFxController implements Initializable {
 	@FXML
 	private void exitToSingUp() {
 		Stage primaryStage = (Stage) this.rootPane.getScene().getWindow();
-		Network.start();
 		primaryStage.close();		
 	}
 	

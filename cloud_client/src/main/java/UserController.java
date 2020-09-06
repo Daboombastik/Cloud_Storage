@@ -32,11 +32,10 @@ public class UserController implements Initializable {
 	
 	public void setUserLabelText(String string) {
 		userLabel.setText(string);
-		if(userLabel.getText().equals("Change Password")) {
-			passwordField.setPromptText("Old Password");;
-			confirmPasswordField.setPromptText("New Password");
+		if(userLabel.getText().equals("Change password")) {
+			passwordField.setPromptText("Enter old password");;
+			confirmPasswordField.setPromptText("Enter new password");
 		}
-		
 	}
 	
 	@FXML
@@ -46,10 +45,6 @@ public class UserController implements Initializable {
 			if(userLabel.getText().equals("Create New User")) {
 				Network.sendMsg(new AuthenticationMessage(loginField.getText(), password, AuthenticationMessage.AuthCommandType.REGISTRATION));
 				Network.sendMsg(new AuthenticationMessage(loginField.getText(), password, AuthenticationMessage.AuthCommandType.REGISTRATION));
-			}
-
-			if(userLabel.getText().equals("Delete User")) {
-				Network.sendMsg(new AuthenticationMessage(loginField.getText(), password, AuthenticationMessage.AuthCommandType.DELETE_USER));
 			}
 		} 
 		if(confirmPasswordField.getPromptText().equals("New Password")) {
